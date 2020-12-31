@@ -1,6 +1,7 @@
 package com.io.moviesflow.API
 
 import com.io.moviesflow.data.Movie
+import com.io.moviesflow.data.SearchResult
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -32,6 +33,6 @@ interface Api {
     //?i=tt3896198&apikey=2a4d1b6b
 
     @GET(".")
-    suspend fun getMovies(@Query("i")  timestamp: String, @Query("apikey") apikey: String) : Movie
+    suspend fun getMovies(@Query("s")  timestamp: String, @Query("apikey") apikey: String) : SearchResult
 
 }

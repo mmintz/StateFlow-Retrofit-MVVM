@@ -6,11 +6,11 @@ import com.io.moviesflow.repository.MainRepository
 
 class MainViewModel(private val repository: MainRepository) : ViewModel() {
 
-    private val _movies = liveData<Movie> {
-        emit(repository.getMovies())
+    private val _movies = liveData<List<Movie>> {
+        emit(repository.getMovies().moviesList)
     }
 
-    val movies: LiveData<Movie> get() = _movies
+    val movies: LiveData<List<Movie>> get() = _movies
 
     class Factory(private val repository: MainRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {

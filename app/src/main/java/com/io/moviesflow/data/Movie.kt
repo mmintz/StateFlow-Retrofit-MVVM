@@ -1,30 +1,19 @@
 package com.io.moviesflow.data
 
+import com.google.gson.annotations.SerializedName
+
+data class SearchResult(
+        val Response: String,
+        @SerializedName("Search")
+        val moviesList: List<Movie>,
+        val totalResults: String
+)
+
 data class Movie(
-    val Actors: String,
-    val Awards: String,
-    val BoxOffice: String,
-    val Country: String,
-    val DVD: String,
-    val Director: String,
-    val Genre: String,
-    val Language: String,
-    val Metascore: String,
-    val Plot: String,
-    val Poster: String,
-    val Production: String,
-    val Rated: String,
-    val Ratings: List<Rating>,
-    val Released: String,
-    val Response: String,
-    val Runtime: String,
-    val Title: String,
-    val Type: String,
-    val Website: String,
-    val Writer: String,
-    val Year: String,
-    val imdbID: String,
-    val imdbRating: String,
-    val imdbVotes: String
+        val Poster: String,
+        val Title: String,
+        val Type: String,
+        val Year: String,
+        val imdbID: String
 )
 
