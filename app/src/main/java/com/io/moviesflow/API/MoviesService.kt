@@ -30,7 +30,6 @@ class MoviesService {
 }
 
 interface Api {
-    //?i=tt3896198&apikey=2a4d1b6b
 
     @GET(".")
     suspend fun getMovies(@Query("s")  timestamp: String, @Query("apikey") apikey: String) : SearchResult
