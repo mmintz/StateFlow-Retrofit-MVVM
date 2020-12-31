@@ -16,12 +16,17 @@ import java.util.Collections.addAll
 class MoviesAdapter() : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
 
     private var moviesList: List<Movie> = emptyList()
+    var onItemClick: ((Movie) -> Unit)? = null
 
-    class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
+    inner class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
 
         private val movieTitle: TextView = itemView.findViewById(R.id.movie_title)
         private val movieImage: ImageView = itemView.findViewById(R.id.movie_image)
-
+        init {
+            itemView.setOnClickListener {
+                onItemClick?.invoke(moviesList[adapterPosition])
+            }
+        }
         fun bind(movie : Movie)
         {
             itemView.apply {
@@ -31,9 +36,6 @@ class MoviesAdapter() : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
                         .into(movieImage)
             }
         }
-
-
-
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MovieViewHolder =

@@ -12,6 +12,7 @@ class MainViewModel(private val repository: MainRepository) : ViewModel() {
 
     val movies: LiveData<List<Movie>> get() = _movies
 
+    @Suppress("UNCHECKED_CAST")
     class Factory(private val repository: MainRepository) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
             return MainViewModel(repository) as T
