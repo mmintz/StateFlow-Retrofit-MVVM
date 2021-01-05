@@ -16,6 +16,7 @@ class MainActivity : AppCompatActivity()  {
 
 
     private lateinit var adapter : MoviesAdapter
+    private lateinit var mainViewModel : MainViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,39 +25,44 @@ class MainActivity : AppCompatActivity()  {
         subscribeUI()
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.e("TAG","resuming main")
-    }
+
 
     private fun setupUI() {
-        val recyclerView: RecyclerView = findViewById(R.id.moviesView)
+        val recyclerView: RecyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = MoviesAdapter()
         recyclerView.adapter = adapter
         adapter.onItemClick = { movie ->
 
-            Log.e("Movie clicked",movie.Title)
+            Log.e("Tag", movie.Title + " " + movie.liked)
             val intent = Intent(this, MovieActivity::class.java)
-
-            intent.putExtra("imdbId", movie.imdbID)
-            intent.putExtra("imageId", movie.Poster)
-            intent.putExtra("title", movie.Title)
-            intent.putExtra("year",movie.Year)
-            intent.putExtra("type",movie.Type)
+            intent.putExtra("movie", movie)
             startActivity(intent)
         }
-
+        adapter.likedClicked = { movie ->
+            Log.e("Tag", "Liked clicked")
+            mainViewModel.changeLike(movie)
+        }
     }
-
     private fun subscribeUI() {
-       val mainViewModel =  ViewModelProviders.of(this, MainViewModel.Factory(MainRepository(MoviesService()))).get(MainViewModel::class.java)
+        Log.e("TAG","Main Subbing to view model")
+        mainViewModel =  ViewModelProviders.of(this, MainViewModel.Factory()).get(MainViewModel::class.java)
         mainViewModel.movies.observe(this) {
             populateList(it)
+            Log.e("Main","Observing")
         }
+
+
+
+
     }
     private fun populateList(movies: List<Movie>) {
         adapter.addMovies(movies)
 
+    }
+
+    private fun addMovieChange()
+    {
+        adapter.notifyDataSetChanged()
     }
 }
