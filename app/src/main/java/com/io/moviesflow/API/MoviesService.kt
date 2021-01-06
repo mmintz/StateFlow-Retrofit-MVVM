@@ -27,12 +27,12 @@ class MoviesService {
         val apiService: Api = getRetrofit().create(Api::class.java)
     }
 
-    suspend fun getMovies(timestamp: String, apiKey: String) = apiService.getMovies(timestamp,apiKey)
+    suspend fun getMovies(timestamp: String, apiKey: String, movieType: String) = apiService.getMovies(timestamp,apiKey,movieType)
 }
 
 interface Api {
 
     @GET(".")
-    suspend fun getMovies(@Query("s")  timestamp: String, @Query("apikey") apikey: String) : SearchResult
+    suspend fun getMovies(@Query("s")  timestamp: String, @Query("apikey") apikey: String, @Query("type") movieType: String) : SearchResult
 
 }

@@ -1,13 +1,10 @@
 package com.io.moviesflow.UI
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.liveData
+import androidx.lifecycle.*
 import com.io.moviesflow.data.Movie
 import com.io.moviesflow.repository.MainRepository
 
-class MovieViewModel() : ViewModel() {
+class MovieViewModel(private val movie: Movie) : ViewModel() {
 
     /*
     private val _movies = liveData<List<Movie>> {
@@ -16,12 +13,18 @@ class MovieViewModel() : ViewModel() {
 
     val movies: LiveData<List<Movie>> get() = _movies
 */
+    val isLiked: LiveData<Boolean> get() = MainRepository.movies.map { movies ->
+        movies.firstOrNull{ it.Title == movie.Title} != null
+    }
+
+
     fun changeLike(movie:Movie) = MainRepository.changeMovieLike(movie = movie)
 
+
     @Suppress("UNCHECKED_CAST")
-    class Factory() : ViewModelProvider.Factory {
+    class Factory(private val movie: Movie) : ViewModelProvider.Factory {
         override fun <T : ViewModel?> create(modelClass: Class<T>): T {
-            return MovieViewModel() as T
+            return MovieViewModel(movie) as T
         }
 
     }

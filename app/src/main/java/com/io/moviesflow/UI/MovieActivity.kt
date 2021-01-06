@@ -30,20 +30,24 @@ class MovieActivity : AppCompatActivity() {
         val intent : Intent = getIntent()
         setupUi(intent)
         subscribeUI()
-
     }
-
-
 
     private fun subscribeUI() {
         Log.e("TAG","Main Subbing to view model")
-        movieViewModel =  ViewModelProviders.of(this, MovieViewModel.Factory()).get(MovieViewModel::class.java)
-
+        movieViewModel =  ViewModelProviders.of(this, MovieViewModel.Factory(movie)).get(MovieViewModel::class.java)
+        movieViewModel.isLiked.observe(this){
+            if(it) {
+                movieLiked.setImageResource(R.drawable.ic_adnroid_like_24dp_red)
+            }
+            else{
+                movieLiked.setImageResource(R.drawable.ic_android_like_24dp)
+            }
+        }
 
     }
     private fun setupUi(intent: Intent) {
 
-        movie= intent.getParcelableExtra("movie")!!
+        movie = intent.getParcelableExtra("movie")!!
 
         movieImage = findViewById(R.id.movie_image)
         movieTitle = findViewById(R.id.movie_title)
@@ -58,22 +62,7 @@ class MovieActivity : AppCompatActivity() {
 
         movieLiked = findViewById(R.id.movie_like)
 
-        if(movie?.liked == true) {
-            movieLiked.setImageResource(R.drawable.ic_adnroid_like_24dp_red)
-
-        }
-        else{
-            movieLiked.setImageResource(R.drawable.ic_android_like_24dp)
-        }
-
         movieLiked.setOnClickListener{
-            if(movie?.liked == true) {
-                movieLiked.setImageResource(R.drawable.ic_android_like_24dp)
-            }
-            else{
-                movieLiked.setImageResource(R.drawable.ic_adnroid_like_24dp_red)
-            }
-
             movieViewModel.changeLike(movie)
         }
     }

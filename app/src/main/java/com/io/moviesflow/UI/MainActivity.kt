@@ -4,6 +4,7 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -26,7 +27,6 @@ class MainActivity : AppCompatActivity()  {
     }
 
 
-
     private fun setupUI() {
         val recyclerView: RecyclerView = findViewById(R.id.recycler)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -43,18 +43,32 @@ class MainActivity : AppCompatActivity()  {
             Log.e("Tag", "Liked clicked")
             mainViewModel.changeLike(movie)
         }
+
+        val switch: SwitchCompat = findViewById(R.id.switch_new)
+
+        switch.setOnClickListener{
+            if(switch.isChecked) {
+                mainViewModel.switchClicked(2015)
+            }
+            else{
+                mainViewModel.switchClicked(null)
+            }
+        }
+
     }
     private fun subscribeUI() {
         Log.e("TAG","Main Subbing to view model")
         mainViewModel =  ViewModelProviders.of(this, MainViewModel.Factory()).get(MainViewModel::class.java)
         mainViewModel.movies.observe(this) {
             populateList(it)
-            Log.e("Main","Observing")
+            Log.e("Main","puplating")
+            it.forEach { movie->
+                Log.e("Main","Year "+ movie.Year)
+            }
         }
-
-
-
-
+        mainViewModel.sortedMovies.observe(this){
+            populateList(it)
+        }
     }
     private fun populateList(movies: List<Movie>) {
         adapter.addMovies(movies)
