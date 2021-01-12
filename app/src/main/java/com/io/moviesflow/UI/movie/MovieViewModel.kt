@@ -1,4 +1,4 @@
-package com.io.moviesflow.UI
+package com.io.moviesflow.UI.movie
 
 import androidx.lifecycle.*
 import com.io.moviesflow.data.Movie
@@ -13,12 +13,12 @@ class MovieViewModel(private val movie: Movie) : ViewModel() {
 
     val movies: LiveData<List<Movie>> get() = _movies
 */
-    val isLiked: LiveData<Boolean> get() = MainRepository.movies.map { movies ->
-        movies.firstOrNull{ it.Title == movie.Title} != null
+    val isLiked: LiveData<Boolean> get() = MainRepository.INSTANCE.movies.map { movies ->
+        movies.firstOrNull{ it.Title == movie.Title}?.liked == true
     }
 
 
-    fun changeLike(movie:Movie) = MainRepository.changeMovieLike(movie = movie)
+    fun changeLike(movie:Movie) = MainRepository.INSTANCE.changeMovieLike(movie = movie)
 
 
     @Suppress("UNCHECKED_CAST")

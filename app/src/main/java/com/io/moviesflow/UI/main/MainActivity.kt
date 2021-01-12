@@ -1,4 +1,4 @@
-package com.io.moviesflow.UI
+package com.io.moviesflow.UI.main
 
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
@@ -8,10 +8,9 @@ import androidx.appcompat.widget.SwitchCompat
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.R
+import com.io.moviesflow.UI.movie.MovieActivity
 import com.io.moviesflow.data.Movie
-import com.io.moviesflow.repository.MainRepository
 
 class MainActivity : AppCompatActivity()  {
 
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity()  {
 
         switch.setOnClickListener{
             if(switch.isChecked) {
-                mainViewModel.switchClicked(2015)
+                mainViewModel.switchClicked(2002)
             }
             else{
                 mainViewModel.switchClicked(null)
@@ -65,9 +64,6 @@ class MainActivity : AppCompatActivity()  {
             it.forEach { movie->
                 Log.e("Main","Year "+ movie.Year)
             }
-        }
-        mainViewModel.sortedMovies.observe(this){
-            populateList(it)
         }
     }
     private fun populateList(movies: List<Movie>) {

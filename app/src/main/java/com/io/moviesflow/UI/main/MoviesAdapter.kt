@@ -1,18 +1,14 @@
-package com.io.moviesflow.UI
+package com.io.moviesflow.UI.main
 
-import android.media.Image
-import android.text.method.TextKeyListener.clear
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.view.menu.ActionMenuItemView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.io.moviesflow.R
 import com.io.moviesflow.data.Movie
-import java.util.Collections.addAll
 
 class MoviesAdapter() : RecyclerView.Adapter<MoviesAdapter.MovieViewHolder>() {
 

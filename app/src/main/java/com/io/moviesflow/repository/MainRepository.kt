@@ -1,88 +1,89 @@
 package com.io.moviesflow.repository
 
-import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations.switchMap
-import androidx.lifecycle.liveData
-import androidx.lifecycle.map
-import com.io.moviesflow.API.Api
+import androidx.lifecycle.*
 import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.API.MoviesService.Companion.apiService
 import com.io.moviesflow.data.Movie
-import com.io.moviesflow.data.SearchResult
 import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import java.lang.Exception
+
 
 class MainRepository {
 
-    companion object Instance {
+    private val _moviesList = MutableLiveData<List<Movie>>(emptyList())
+    //private val _moviesByYear = MutableLiveData<List<Movie>>(emptyList())
+    private val _liveDataMerger = MediatorLiveData<List<Movie>>()
+    private val _year = MutableLiveData<Int>()
 
-/*
-        private var  _moviesList : LiveData<List<Movie>> = liveData {
-            emit(getMovies().moviesList)
-        }
-*/
-        private val _moviesList = MutableLiveData<List<Movie>>(emptyList())
-        private val _moviesByYear = MutableLiveData<List<Movie>>(emptyList())
-
-        init {
-            GlobalScope.launch {
-               /// delay(2000)
-                _moviesList.postValue(getMovies().moviesList)
-            }
-        }
-
-        suspend fun getMovies() = apiService.getMovies("game", "2a4d1b6b","movie")
+    val movies: LiveData<List<Movie>> = _moviesList  //this is a reference
+    val mediatorMovies: MediatorLiveData<List<Movie>> = _liveDataMerger
 
 
-        val movies: LiveData<List<Movie>> = _moviesList  //this is a reference
+    //TODO: what happens if i call getMovies? Do we update the movieslist we have here ? no
 
-        fun changeMovieLike(movie: Movie) {
-            val newMovies = movies.value?.map {
-                if(it.Title == movie.Title)
-                {
-                    it.copy(liked = ! it.liked)
-                }
-                else{
-                    it
-                }
-            }
-
-            _moviesList.postValue(newMovies)    //TODO IS THIS IN THE UI ???
-            //movies.value?.find { it.Title == movie.Title }?.let { it.liked = !(it.liked) }
-        }
-
-        //TODO: what happens if i call getMovies? Do we update the movieslist we have here ? no
-
-        val moviesByYear: LiveData<List<Movie>> = _moviesByYear
-        //TODO: To map tha treksei sto main thread? to Taransform
+    //val moviesByYear: LiveData<List<Movie>> = _moviesByYear
+    //TODO: To map tha treksei sto main thread? to Taransform
 
 
-        fun applyFiltering(year: Int?)
-        {
-            //TODO: giati epimenei oti prepei na en unit
-            if(year != null) {
-                val tempMovies = movies.value?.filter { movie ->
+    fun applyFiltering(year: Int?) {
+        _year.value = year
+    }
+
+
+    init {
+
+        val combine = {
+            val movies = _moviesList.value
+            val year = _year.value
+            if (year == null) {
+                _liveDataMerger.value = movies
+            } else {
+                _liveDataMerger.value = movies?.filter { movie ->
                     movie.Year.toInt() < year
                 }
-                _moviesByYear.postValue(tempMovies)
             }
-            else {
-                _moviesList.postValue(movies.value)
-            }
-               //setting the value but from any thread ...setValue does the same but only from UI thread
         }
 
+        _liveDataMerger.addSource(_moviesList) {
+            combine()
+        }
 
-            //_moviesByYear.value = moviesByYearTemp
+        _liveDataMerger.addSource(_year) {
+            combine()
+        }
 
-           // _moviesByYear.postValue(tempMovies)
+        GlobalScope.launch {
+           // delay(5000)
+
+            val result = try {
+                getMovies().moviesList
+            } catch (e: Exception) {
+                println("Exception " + e.message)
+                emptyList()
+            }
+            _moviesList.postValue(result)
+        }
+    }
+
+    private suspend fun getMovies() = apiService.getMovies("game", "2a4d1b6b", "movie")
 
 
+    fun changeMovieLike(movie: Movie) {
+        val newMovies = movies.value?.map {
+            if(it.Title == movie.Title)
+            {
+                it.copy(liked = !it.liked)
+            }
+            else{
+                it
+            }
+        }
+
+        _moviesList.postValue(newMovies)    //TODO IS THIS IN THE UI ???
+        //movies.value?.find { it.Title == movie.Title }?.let { it.liked = !(it.liked) }
+    }
+    companion object  {
+        val INSTANCE = MainRepository()
 
     }
 

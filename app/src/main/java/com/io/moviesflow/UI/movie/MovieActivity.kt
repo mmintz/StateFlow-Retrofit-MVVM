@@ -1,7 +1,6 @@
-package com.io.moviesflow.UI
+package com.io.moviesflow.UI.movie
 
 import android.content.Intent
-import android.media.Image
 import android.os.Bundle
 import android.util.Log
 import android.widget.ImageView
@@ -9,10 +8,8 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
-import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.R
 import com.io.moviesflow.data.Movie
-import com.io.moviesflow.repository.MainRepository
 
 class MovieActivity : AppCompatActivity() {
 
@@ -34,7 +31,8 @@ class MovieActivity : AppCompatActivity() {
 
     private fun subscribeUI() {
         Log.e("TAG","Main Subbing to view model")
-        movieViewModel =  ViewModelProviders.of(this, MovieViewModel.Factory(movie)).get(MovieViewModel::class.java)
+        movieViewModel =  ViewModelProviders.of(this, MovieViewModel.Factory(movie)).get(
+            MovieViewModel::class.java)
         movieViewModel.isLiked.observe(this){
             if(it) {
                 movieLiked.setImageResource(R.drawable.ic_adnroid_like_24dp_red)
