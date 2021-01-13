@@ -2,13 +2,12 @@ package com.io.moviesflow.repository
 
 import androidx.lifecycle.*
 import com.io.moviesflow.API.MoviesService
-import com.io.moviesflow.API.MoviesService.Companion.apiService
 import com.io.moviesflow.data.Movie
 import kotlinx.coroutines.*
 import java.lang.Exception
 
 
-class MainRepository {
+class MainRepository(private val apiService: MoviesService,private val scope: CoroutineScope = GlobalScope) {
 
     private val _moviesList = MutableLiveData<List<Movie>>(emptyList())
     //private val _moviesByYear = MutableLiveData<List<Movie>>(emptyList())
@@ -52,14 +51,14 @@ class MainRepository {
             combine()
         }
 
-        GlobalScope.launch {
+        scope.launch {
            // delay(5000)
 
             val result = try {
-                getMovies().moviesList
+                getMovies().moviesList //Todo afou en suspsend
             } catch (e: Exception) {
                 println("Exception " + e.message)
-                emptyList()
+                emptyList<Movie>()
             }
             _moviesList.postValue(result)
         }
@@ -83,7 +82,7 @@ class MainRepository {
         //movies.value?.find { it.Title == movie.Title }?.let { it.liked = !(it.liked) }
     }
     companion object  {
-        val INSTANCE = MainRepository()
+        val INSTANCE = MainRepository(MoviesService())
 
     }
 
