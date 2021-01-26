@@ -1,17 +1,19 @@
 package com.io.moviesflow.UI
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
+import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.R
 import com.io.moviesflow.data.Movie
-import com.io.moviesflow.repository.MainRepository
+import com.io.moviesflow.data.SearchResult
+import okhttp3.ResponseBody
+import java.io.IOException
 
 class MainActivity : AppCompatActivity()  {
 
@@ -57,19 +59,41 @@ class MainActivity : AppCompatActivity()  {
 
     }
     private fun subscribeUI() {
-        Log.e("TAG","Main Subbing to view model")
-        mainViewModel =  ViewModelProviders.of(this, MainViewModel.Factory()).get(MainViewModel::class.java)
-        mainViewModel.movies.observe(this) {
+        Log.e("TAG", "Main Subbing to view model")
+        mainViewModel =
+            ViewModelProviders.of(this, MainViewModel.Factory()).get(MainViewModel::class.java)
+            Thread.sleep(3000)
+//        viewModel.makeQuery().observe(this,
+//            Observer<ResponseBody> { responseBody ->
+//                Log.d(TAG, "onChanged: this is a live data response!")
+//                try {
+//                    Log.d(TAG, "onChanged: " + responseBody.string())
+//                } catch (e: IOException) {
+//                    e.printStackTrace()
+//                }
+//            })
+        Log.e("MainActivity","starting to observe")
+        mainViewModel.movies.observe(this,
+            androidx.lifecycle.Observer<SearchResult>() { searchRes ->
+
+                Log.e("Main", "puplating")
+                try {
+
+                    searchRes.moviesList.forEach { movie ->
+                        Log.e("Main", "Year " + movie.Year)
+                        populateList(searchRes.moviesList)
+                    }
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            })
+
+        mainViewModel.sortedMovies.observe(this) {
             populateList(it)
-            Log.e("Main","puplating")
-            it.forEach { movie->
-                Log.e("Main","Year "+ movie.Year)
-            }
         }
-        mainViewModel.sortedMovies.observe(this){
-            populateList(it)
-        }
+
     }
+
     private fun populateList(movies: List<Movie>) {
         adapter.addMovies(movies)
 

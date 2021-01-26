@@ -2,11 +2,13 @@ package com.io.moviesflow.UI
 
 import androidx.lifecycle.*
 import com.io.moviesflow.data.Movie
+import com.io.moviesflow.data.SearchResult
 import com.io.moviesflow.repository.MainRepository
+import okhttp3.ResponseBody
 
 class MainViewModel() : ViewModel() {
 
-    val movies: LiveData<List<Movie>> get() = MainRepository.movies
+    val movies: LiveData<SearchResult> get() =  MainRepository.getMovies()
 
     fun changeLike(movie:Movie) = MainRepository.changeMovieLike(movie = movie)
 

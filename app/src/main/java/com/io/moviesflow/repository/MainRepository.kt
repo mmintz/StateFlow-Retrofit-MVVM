@@ -2,20 +2,15 @@ package com.io.moviesflow.repository
 
 import android.util.Log
 import androidx.lifecycle.LiveData
+import androidx.lifecycle.LiveDataReactiveStreams
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations.switchMap
-import androidx.lifecycle.liveData
-import androidx.lifecycle.map
-import com.io.moviesflow.API.Api
 import com.io.moviesflow.API.MoviesService
-import com.io.moviesflow.API.MoviesService.Companion.apiService
 import com.io.moviesflow.data.Movie
 import com.io.moviesflow.data.SearchResult
+import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import okhttp3.ResponseBody
+
 
 class MainRepository {
 
@@ -29,14 +24,38 @@ class MainRepository {
         private val _moviesList = MutableLiveData<List<Movie>>(emptyList())
         private val _moviesByYear = MutableLiveData<List<Movie>>(emptyList())
 
+
+
         init {
             GlobalScope.launch {
                /// delay(2000)
-                _moviesList.postValue(getMovies().moviesList)
+                val listofMovies = getMovies().value?.moviesList
+                Log.e("init of repo ", (listofMovies?.get(0)?.Year.toString()))
+               _moviesList.postValue( listofMovies)
+                Log.e("init of repo ", "postedValue")
+
+
             }
         }
+//        fun getMovies2() : Flowable<SearchResult>
+//        {
+//            apiService.getMovies("game","2a4d1b6b","movie")
+//        }
 
-        suspend fun getMovies() = apiService.getMovies("game", "2a4d1b6b","movie")
+        @JvmName("getMovies1")
+        fun getMovies() : LiveData<SearchResult> {
+             return LiveDataReactiveStreams.fromPublisher(MoviesService.requestApi
+                .getMovies("game", "2a4d1b6b", "movie")
+                .subscribeOn(Schedulers.io()))
+        }
+
+//        fun makeReactiveQuery(): LiveData<ResponseBody?>? {
+//            return LiveDataReactiveStreams.fromPublisher(ServiceGenerator.getRequestApi()
+//                .makeQuery()
+//                .subscribeOn(Schedulers.io()))
+//        }
+
+                //= ApiService.getMoviesObservable("game","2a4d1b6b","movie") //apiService.getMovies("game", "2a4d1b6b","movie")
 
 
         val movies: LiveData<List<Movie>> = _moviesList  //this is a reference
@@ -45,7 +64,7 @@ class MainRepository {
             val newMovies = movies.value?.map {
                 if(it.Title == movie.Title)
                 {
-                    it.copy(liked = ! it.liked)
+                    it.copy(liked = !it.liked)
                 }
                 else{
                     it
