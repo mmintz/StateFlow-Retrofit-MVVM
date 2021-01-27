@@ -8,7 +8,7 @@ import okhttp3.ResponseBody
 
 class MainViewModel() : ViewModel() {
 
-    val movies: LiveData<SearchResult> get() =  MainRepository.getMovies()
+    val movies: LiveData<List<Movie>> get() =  MainRepository.moviesByYear
 
     fun changeLike(movie:Movie) = MainRepository.changeMovieLike(movie = movie)
 
@@ -17,7 +17,7 @@ class MainViewModel() : ViewModel() {
         MainRepository.applyFiltering(year)
     }
 
-    val sortedMovies : LiveData<List<Movie>> get() = MainRepository.moviesByYear
+   // val sortedMovies : LiveData<List<Movie>> get() = MainRepository.moviesByYear
 
     @Suppress("UNCHECKED_CAST")
     class Factory() : ViewModelProvider.Factory {

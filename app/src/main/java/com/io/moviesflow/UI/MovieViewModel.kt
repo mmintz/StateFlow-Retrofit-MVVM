@@ -13,8 +13,8 @@ class MovieViewModel(private val movie: Movie) : ViewModel() {
 
     val movies: LiveData<List<Movie>> get() = _movies
 */
-    val isLiked: LiveData<Boolean> get() = MainRepository.movies.map { movies ->
-        movies.firstOrNull{ it.Title == movie.Title} != null
+    val isLiked: LiveData<Boolean> get() = MainRepository.moviesByYear.map { movies ->
+        movies.firstOrNull{ it.Title == movie.Title} ?.liked == true
     }
 
 

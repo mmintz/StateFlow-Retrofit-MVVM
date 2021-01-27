@@ -1,9 +1,7 @@
 package com.io.moviesflow.repository
 
 import android.util.Log
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.LiveDataReactiveStreams
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.*
 import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.data.Movie
 import com.io.moviesflow.data.SearchResult
@@ -21,21 +19,34 @@ class MainRepository {
             emit(getMovies().moviesList)
         }
 */
-        private val _moviesList = MutableLiveData<List<Movie>>(emptyList())
+        private val _moviesList : LiveData<List<Movie>>
         private val _moviesByYear = MutableLiveData<List<Movie>>(emptyList())
+        private val yearFilter = MutableLiveData<Int?>()
+        private val combinedMovies = MediatorLiveData<List<Movie>>()
 
-
+        private val likedMovies = MutableLiveData<Set<String>>(emptySet())
 
         init {
-            GlobalScope.launch {
-               /// delay(2000)
-                val listofMovies = getMovies().value?.moviesList
-                Log.e("init of repo ", (listofMovies?.get(0)?.Year.toString()))
-               _moviesList.postValue( listofMovies)
-                Log.e("init of repo ", "postedValue")
+            //otan kalestei thelw na m to kameis transfrom. En na kalestei otan to kamei observe kapios
+            _moviesList = Transformations.map(getMovies()){
+                it.moviesList
+            }
+            //kaliounte sto UI thread gft en evalame post value
+            combinedMovies.addSource(_moviesList){ combinedMovies.value = combine()}
+            combinedMovies.addSource(yearFilter){ combinedMovies.value = combine() }
+            combinedMovies.addSource(likedMovies){ combinedMovies.value = combine() }
+        }
 
+        private fun combine() : List<Movie>{
+            //an den eshis movies dwke null alliws ta movies
+            val movies = _moviesList.value ?: return emptyList()
+            val year = yearFilter.value
+            val m = if(year != null)  movies.filter { it.Year.toInt() < year } else movies
+            return m.map {
+                if(likedMovies.value!!.contains(it.imdbID)) it.copy(liked = true) else it
 
             }
+
         }
 //        fun getMovies2() : Flowable<SearchResult>
 //        {
@@ -61,38 +72,36 @@ class MainRepository {
         val movies: LiveData<List<Movie>> = _moviesList  //this is a reference
 
         fun changeMovieLike(movie: Movie) {
-            val newMovies = movies.value?.map {
-                if(it.Title == movie.Title)
-                {
-                    it.copy(liked = !it.liked)
-                }
-                else{
-                    it
-                }
-            }
 
-            _moviesList.postValue(newMovies)    //TODO IS THIS IN THE UI ???
+            val likedMovie = likedMovies.value!!
+            if(likedMovie.contains(movie.imdbID))
+                likedMovies.value = likedMovie.minus(movie.imdbID) //epistrefei neo set xwris touto to element
+            else
+                likedMovies.value = likedMovie.plus(movie.imdbID)
+
+//            val newMovies = movies.value?.map {
+//                if(it.Title == movie.Title)
+//                {
+//                    it.copy(liked = !it.liked)
+//                }
+//                else{
+//                    it
+//                }
+//            }
+//
+//           moviesByYear.postValue(newMovies)    //TODO IS THIS IN THE UI ???
             //movies.value?.find { it.Title == movie.Title }?.let { it.liked = !(it.liked) }
         }
 
         //TODO: what happens if i call getMovies? Do we update the movieslist we have here ? no
 
-        val moviesByYear: LiveData<List<Movie>> = _moviesByYear
+        val moviesByYear: LiveData<List<Movie>> = combinedMovies
         //TODO: To map tha treksei sto main thread? to Taransform
 
 
         fun applyFiltering(year: Int?)
         {
-            //TODO: giati epimenei oti prepei na en unit
-            if(year != null) {
-                val tempMovies = movies.value?.filter { movie ->
-                    movie.Year.toInt() < year
-                }
-                _moviesByYear.postValue(tempMovies)
-            }
-            else {
-                _moviesList.postValue(movies.value)
-            }
+            yearFilter.postValue(year)
                //setting the value but from any thread ...setValue does the same but only from UI thread
         }
 

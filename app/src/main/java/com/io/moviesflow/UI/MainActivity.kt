@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity()  {
 
         switch.setOnClickListener{
             if(switch.isChecked) {
-                mainViewModel.switchClicked(2015)
+                mainViewModel.switchClicked(201)
             }
             else{
                 mainViewModel.switchClicked(null)
@@ -73,24 +73,24 @@ class MainActivity : AppCompatActivity()  {
 //                }
 //            })
         Log.e("MainActivity","starting to observe")
-        mainViewModel.movies.observe(this,
-            androidx.lifecycle.Observer<SearchResult>() { searchRes ->
+        mainViewModel.movies.observe(this, { moviesList ->
 
                 Log.e("Main", "puplating")
                 try {
 
-                    searchRes.moviesList.forEach { movie ->
+                    moviesList.forEach { movie ->
                         Log.e("Main", "Year " + movie.Year)
-                        populateList(searchRes.moviesList)
+
                     }
+                    populateList(moviesList)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
             })
 
-        mainViewModel.sortedMovies.observe(this) {
-            populateList(it)
-        }
+        //mainViewModel.sortedMovies.observe(this) {
+        //    populateList(it)
+       // }
 
     }
 
