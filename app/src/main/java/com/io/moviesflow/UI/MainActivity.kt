@@ -50,7 +50,7 @@ class MainActivity : AppCompatActivity()  {
 
         switch.setOnClickListener{
             if(switch.isChecked) {
-                mainViewModel.switchClicked(201)
+                mainViewModel.switchClicked(2011)
             }
             else{
                 mainViewModel.switchClicked(null)
@@ -62,7 +62,7 @@ class MainActivity : AppCompatActivity()  {
         Log.e("TAG", "Main Subbing to view model")
         mainViewModel =
             ViewModelProviders.of(this, MainViewModel.Factory()).get(MainViewModel::class.java)
-            Thread.sleep(3000)
+
 //        viewModel.makeQuery().observe(this,
 //            Observer<ResponseBody> { responseBody ->
 //                Log.d(TAG, "onChanged: this is a live data response!")

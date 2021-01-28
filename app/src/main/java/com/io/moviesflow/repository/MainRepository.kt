@@ -5,9 +5,10 @@ import androidx.lifecycle.*
 import com.io.moviesflow.API.MoviesService
 import com.io.moviesflow.data.Movie
 import com.io.moviesflow.data.SearchResult
+import io.reactivex.functions.*
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
-import okhttp3.ResponseBody
+import kotlin.Throwable as Throwable1
 
 
 class MainRepository {
@@ -28,9 +29,7 @@ class MainRepository {
 
         init {
             //otan kalestei thelw na m to kameis transfrom. En na kalestei otan to kamei observe kapios
-            _moviesList = Transformations.map(getMovies()){
-                it.moviesList
-            }
+            _moviesList = getMovies()
             //kaliounte sto UI thread gft en evalame post value
             combinedMovies.addSource(_moviesList){ combinedMovies.value = combine()}
             combinedMovies.addSource(yearFilter){ combinedMovies.value = combine() }
@@ -48,28 +47,57 @@ class MainRepository {
             }
 
         }
-//        fun getMovies2() : Flowable<SearchResult>
-//        {
-//            apiService.getMovies("game","2a4d1b6b","movie")
-//        }
+
+        /**
+         * Probably instead of using from publisher here we return a floable.
+         * Inside here we subscribe to it to this result ennow on Next we will getr something
+         * onError we will handle it there
+         * On complete we will do whatever we do. Where is live data ?
+         */
+
 
         @JvmName("getMovies1")
-        fun getMovies() : LiveData<SearchResult> {
-             return LiveDataReactiveStreams.fromPublisher(MoviesService.requestApi
-                .getMovies("game", "2a4d1b6b", "movie")
-                .subscribeOn(Schedulers.io()))
+        fun getMovies() : LiveData<List<Movie>> {
+             return LiveDataReactiveStreams.fromPublisher(
+                 MoviesService.requestApi.getMovies("game", "2a4d1b6b", "movie")
+                     .onErrorReturn(io.reactivex.functions.Function<kotlin.Throwable, SearchResult?>{
+                         Log.e("RepoObservable","error")
+                         SearchResult("error", listOf(Movie("asa","Test","movie","2000","id",true)),"0")
+                         /**En ola chained
+                            evala ena movie mes to list sto map p ta epistrefei edike mono tsino
+                           prepei eite na kamoume throw exception and handle it or something else
+                          check it out
+                          */
+
+                         })
+                     .map(io.reactivex.functions.Function<SearchResult, List<Movie>> {
+                         it.moviesList
+
+                     })
+                     .subscribeOn(Schedulers.io()))
         }
 
-//        fun makeReactiveQuery(): LiveData<ResponseBody?>? {
-//            return LiveDataReactiveStreams.fromPublisher(ServiceGenerator.getRequestApi()
-//                .makeQuery()
-//                .subscribeOn(Schedulers.io()))
+
+//        fun makeAPICall(): LiveData<String?>? {
+//            return LiveDataReactiveStreams.fromPublisher(
+//                sampleAPI.getFlowableResponse()
+//                    .onErrorReturn(object : Function<Throwable1?, BoredActivities?>() {
+//                        @Throws(Exception::class)
+//                        fun apply(throwable: Throwable1?): BoredActivities? {
+//                            val boredActivities = BoredActivities()
+//                            boredActivities.setLink("")
+//                            return boredActivities
+//                        }
+//                    })
+//                    .map(object : Function<BoredActivities?, String?>() {
+//                        @Throws(Exception::class)
+//                        fun apply(boredActivities: BoredActivities): String? {
+//                            return boredActivities.getLink()
+//                        }
+//                    })
+//                    .subscribeOn(Schedulers.io()))
 //        }
 
-                //= ApiService.getMoviesObservable("game","2a4d1b6b","movie") //apiService.getMovies("game", "2a4d1b6b","movie")
-
-
-        val movies: LiveData<List<Movie>> = _moviesList  //this is a reference
 
         fun changeMovieLike(movie: Movie) {
 
@@ -79,18 +107,7 @@ class MainRepository {
             else
                 likedMovies.value = likedMovie.plus(movie.imdbID)
 
-//            val newMovies = movies.value?.map {
-//                if(it.Title == movie.Title)
-//                {
-//                    it.copy(liked = !it.liked)
-//                }
-//                else{
-//                    it
-//                }
-//            }
-//
-//           moviesByYear.postValue(newMovies)    //TODO IS THIS IN THE UI ???
-            //movies.value?.find { it.Title == movie.Title }?.let { it.liked = !(it.liked) }
+
         }
 
         //TODO: what happens if i call getMovies? Do we update the movieslist we have here ? no
